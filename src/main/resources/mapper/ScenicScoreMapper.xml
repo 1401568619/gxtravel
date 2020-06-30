@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gxtravel.dao.ScenicScoreMapper">
+    <insert id="batchInsert">
+        INSERT INTO scenicscore
+        VALUES
+        <foreach collection="list" item="scenicscore" separator=",">
+            (#{scenicscore.userid},#{scenicscore.scenicid},#{scenicscore.score},#{scenicscore.time})
+        </foreach>
+    </insert>
+    <insert id="addScenicScore" parameterType="com.gxtravel.entity.ScenicScore">
+        insert into scenicscore
+        (
+        userid,
+        scenicid,
+        score,
+        time
+        )
+        values(
+        #{userid,jdbcType=INTEGER},
+        #{scenicid,jdbcType=INTEGER},
+        #{score,jdbcType=DOUBLE},
+        #{time,jdbcType=TIMESTAMP}
+        )
+    </insert>
+    <update id="updateScenicScore" parameterType="com.gxtravel.entity.ScenicScore">
+        update scenicscore
+        <set>
+            score = #{score,jdbcType=DOUBLE},
+            time =  #{time,jdbcType=TIMESTAMP}
+        </set>
+        where userid = #{userid,jdbcType=INTEGER} and scenicid =  #{scenicid,jdbcType=INTEGER}
+    </update>
+
+    <select id="findScenicScore" resultType="com.gxtravel.entity.ScenicScore">
+        select * from scenicscore where userid = #{userid} and scenicid = #{scenicid}
+    </select>
+
+    <select id="selectScenicScoreList" parameterType="String" resultType="com.gxtravel.entity.ScenicScore">
+        select * from scenicscore
+        where time > #{time}
+        order by userid
+    </select>
+
+    <select id="getScoreCount" resultType="int">
+        select count(1) from scenicscore
+    </select>
+
+    <select id="selectScorerListByQueryVo" parameterType="com.gxtravel.entity.QueryVo" resultType="com.gxtravel.entity.ScenicScore">
+        select * from scenicscore limit #{startRow},#{size}
+    </select>
+
+    <delete id="deleteOld" parameterType="String">
+        delete from scenicscore where time  &lt; #{time}
+    </delete>
+
+    <select id="selectPopScenicid" resultType="int">
+        SELECT scenicid FROM scenicscore
+        WHERE score > 3 GROUP BY scenicid ORDER BY COUNT(scenicid) DESC LIMIT 10
+    </select>
+
+
+    <select id="selectCountByTheme" resultType="com.gxtravel.entity.Statistic">
+        SELECT theme,COUNT(*) num
+        FROM scenic, scenicscore
+        WHERE scenic.id=scenicscore.scenicid
+        AND TIME BETWEEN #{atime} AND #{btime}
+        GROUP BY theme
+    </select>
+
+    <select id="selectScenicScoreByUser" resultType="com.gxtravel.entity.ScenicScore">
+        select * from scenicscore where userid = #{userid}
+    </select>
+
+</mapper>
